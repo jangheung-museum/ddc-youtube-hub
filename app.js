@@ -259,7 +259,8 @@
   }
 
   /* ===== 2. 크기 · 놀이 영역 (글자 영역은 못 들어감) ===== */
-  var SC, CW, CH, W, H, GROUND, MINX, MINY, mobile;
+  var SC, CW, CH, W, H, GROUND, MINX, MINY, mobile, TR = [];
+  function overText(l, t, w, h) { for (var i = 0; i < TR.length; i++) { var q = TR[i]; if (l < q.r && l + w > q.l && t < q.b && t + h > q.t) return true; } return false; }
   function textBox() {
     var rr = stage.getBoundingClientRect(), R = 0, B = 0;
     ['.hl .slogan', '.hl .chip', '.hl h1', '.hl .lead', '.hl .cta', '.hl .stats'].forEach(function (q) {
@@ -274,9 +275,12 @@
     SC = mobile ? 4 : 6; CW = 24 * SC; CH = 30 * SC;
     el.style.width = CW + 'px'; el.style.height = CH + 'px';
     GROUND = H - (mobile ? 20 : 32);
-    var tb = textBox();
-    if (mobile) { MINX = 0; MINY = tb.bottom + 8; } else { MINX = tb.right + 24; MINY = -CH * .3; }
-    if (first) { x = mobile ? W - CW - 24 : Math.max(MINX + 40, W - CW - 280); y = GROUND - CH; }
+    MINX = 0; MINY = -CH * .3;
+    TR = []; ['.hl .slogan', '.hl .chip', '.hl h1', '.hl .lead', '.hl .cta', '.hl .stats'].forEach(function (q) {
+      var e = stage.querySelector(q); if (!e) return; var b = e.getBoundingClientRect();
+      TR.push({ l: b.left - rr.left, t: b.top - rr.top, r: b.right - rr.left, b: b.bottom - rr.top });
+    });                         // 언덕 전체 폭 사용 (글자 위로는 뒤로 지나감)
+    if (first) { x = mobile ? W - CW - 24 : W - CW - 280; y = GROUND - CH; }
     x = Math.min(Math.max(x, MINX), W - CW); y = Math.max(Math.min(y, GROUND - CH), MINY);
   }
   measure(true); addEventListener('resize', function () { measure(false); });
@@ -402,8 +406,12 @@
     cv.style.transform = 'scale(' + (sx * flip) + ',' + sy + ')';
     var lift = Math.max(0, (GROUND - CH) - y), k = Math.max(.25, 1 - lift / 420);
     sh.style.transform = 'translate(' + (x + CW / 2 - 55) + 'px,' + (GROUND - 8) + 'px) scale(' + k + ')'; sh.style.opacity = k;
-    say.style.transform = 'translate(-50%,0) translate(' + Math.min(W - 70, Math.max(70, x + CW / 2)) + 'px,' + Math.max(4, y - 44) + 'px)';
-    hint.style.transform = 'translate(' + Math.min(W - 200, Math.max(MINX, x - 40)) + 'px,' + Math.max(MINY, y - 40) + 'px)';
+    var bx = Math.min(W - 70, Math.max(70, x + CW / 2)), by = Math.max(4, y - 44), bw = say.offsetWidth || 90;
+    say.style.transform = 'translate(-50%,0) translate(' + bx + 'px,' + by + 'px)';
+    say.style.visibility = overText(bx - bw / 2, by, bw, 36) ? 'hidden' : 'visible';   // 글자 위에서는 말풍선 숨김
+    var hx = Math.min(W - 200, Math.max(8, x - 40)), hy = Math.max(8, y - 40);
+    hint.style.transform = 'translate(' + hx + 'px,' + hy + 'px)';
+    hint.style.visibility = overText(hx, hy, hint.offsetWidth || 180, 34) ? 'hidden' : 'visible';
     requestAnimationFrame(step);
   }
   requestAnimationFrame(step);

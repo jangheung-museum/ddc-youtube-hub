@@ -314,10 +314,10 @@ nav .btn.coral:active{transform:translateY(1px)}
 
 /* ===== DDC 픽셀 캐릭터 ===== */
 .g2{animation:none;z-index:8}
-.ddc{position:absolute;left:0;top:0;z-index:6;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;will-change:transform}
+.ddc{position:absolute;left:0;top:0;z-index:1;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;will-change:transform}
 .ddc canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;transform-origin:50% 100%;filter:drop-shadow(0 4px 0 rgba(40,70,30,.12))}
-.ddc.grab{cursor:grabbing}
-.ddc-shadow{position:absolute;left:0;top:0;z-index:2;width:110px;height:16px;border-radius:50%;background:radial-gradient(closest-side,rgba(40,60,30,.32),rgba(40,60,30,0));pointer-events:none;will-change:transform,opacity}
+.ddc.grab{cursor:grabbing;z-index:9}
+.ddc-shadow{position:absolute;left:0;top:0;z-index:1;width:110px;height:16px;border-radius:50%;background:radial-gradient(closest-side,rgba(40,60,30,.32),rgba(40,60,30,0));pointer-events:none;will-change:transform,opacity}
 .ddc-say{position:absolute;left:0;top:0;z-index:7;background:#fff;color:#2F3B32;font-size:14px;font-weight:900;padding:7px 12px;border-radius:12px;white-space:nowrap;pointer-events:none;box-shadow:0 0 0 3px #2F3B32,0 6px 0 3px rgba(47,59,50,.25);opacity:0;transition:opacity .2s;font-family:Pretendard,sans-serif}
 .ddc-say::after{content:"";position:absolute;left:50%;bottom:-9px;margin-left:-5px;border:6px solid transparent;border-top-color:#2F3B32;border-bottom:0}
 .ddc-say.on{opacity:1}
@@ -329,3 +329,7 @@ nav .btn.coral:active{transform:translateY(1px)}
 .ddc-hint{position:absolute;left:0;top:0;z-index:7;background:#2F3B32;color:#fff;font-size:13px;font-weight:900;padding:8px 12px;border-radius:12px 12px 12px 3px;white-space:nowrap;pointer-events:none;box-shadow:0 8px 18px -8px rgba(0,0,0,.45);transition:opacity .4s}
 .ddc-hint.off{opacity:0}
 @media (max-width:980px){ .ddc-hint,.ddc-say{font-size:12px} }
+
+/* 캐릭터는 글자·버튼 뒤로 지나가고, 빈 곳에서는 잡을 수 있게 */
+.stage .hl{pointer-events:none}
+.stage .hl a,.stage .hl button,.stage .hl .st,.stage .hl .chip{pointer-events:auto}
