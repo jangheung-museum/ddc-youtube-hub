@@ -312,12 +312,20 @@ nav .btn.coral:active{transform:translateY(1px)}
   .tabbar a.tabask{color:#46640A}
 }
 
-/* ===== DDC 캐릭터 놀이 ===== */
-.g2{animation:none}
+/* ===== DDC 픽셀 캐릭터 ===== */
+.g2{animation:none;z-index:8}
 .ddc{position:absolute;left:0;top:0;z-index:6;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;will-change:transform}
-.ddc img{position:absolute;left:50%;bottom:0;height:100%;transform:translateX(-50%);pointer-events:none;filter:drop-shadow(0 10px 10px rgba(40,70,30,.18));transition:transform .12s}
+.ddc canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;transform-origin:50% 100%;filter:drop-shadow(0 4px 0 rgba(40,70,30,.12))}
 .ddc.grab{cursor:grabbing}
-.ddc-shadow{position:absolute;left:0;top:0;z-index:2;width:140px;height:22px;border-radius:50%;background:radial-gradient(closest-side,rgba(40,60,30,.32),rgba(40,60,30,0));pointer-events:none;will-change:transform,opacity}
+.ddc-shadow{position:absolute;left:0;top:0;z-index:2;width:110px;height:16px;border-radius:50%;background:radial-gradient(closest-side,rgba(40,60,30,.32),rgba(40,60,30,0));pointer-events:none;will-change:transform,opacity}
+.ddc-say{position:absolute;left:0;top:0;z-index:7;background:#fff;color:#2F3B32;font-size:14px;font-weight:900;padding:7px 12px;border-radius:12px;white-space:nowrap;pointer-events:none;box-shadow:0 0 0 3px #2F3B32,0 6px 0 3px rgba(47,59,50,.25);opacity:0;transition:opacity .2s;font-family:Pretendard,sans-serif}
+.ddc-say::after{content:"";position:absolute;left:50%;bottom:-9px;margin-left:-5px;border:6px solid transparent;border-top-color:#2F3B32;border-bottom:0}
+.ddc-say.on{opacity:1}
+.ddc-fx{position:absolute;inset:0;z-index:7;pointer-events:none;overflow:hidden;border-radius:inherit}
+.ddc-fx i{position:absolute;font-style:normal;font-weight:900;font-size:20px;line-height:1;animation:fxup 1.1s ease-out forwards;text-shadow:0 2px 0 rgba(0,0,0,.15)}
+.ddc-fx i.z{color:#5B6E9E;font-size:18px;animation:fxz 2s ease-out forwards}
+@keyframes fxup{0%{transform:translate(0,0) scale(.6);opacity:0}15%{opacity:1;transform:translate(var(--dx),-10px) scale(1.1)}100%{transform:translate(calc(var(--dx)*2),-70px) scale(.9);opacity:0}}
+@keyframes fxz{0%{transform:translate(0,0) scale(.6);opacity:0}20%{opacity:1}100%{transform:translate(26px,-60px) scale(1.2);opacity:0}}
 .ddc-hint{position:absolute;left:0;top:0;z-index:7;background:#2F3B32;color:#fff;font-size:13px;font-weight:900;padding:8px 12px;border-radius:12px 12px 12px 3px;white-space:nowrap;pointer-events:none;box-shadow:0 8px 18px -8px rgba(0,0,0,.45);transition:opacity .4s}
 .ddc-hint.off{opacity:0}
-@media (max-width:980px){ .ddc-hint{font-size:12px} }
+@media (max-width:980px){ .ddc-hint,.ddc-say{font-size:12px} }

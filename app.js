@@ -208,123 +208,253 @@
   });
 })();
 
-/* ---------- DDC 캐릭터 놀이 (잡기 · 던지기 · 튕기기) ---------- */
+/* ---------- DDC 픽셀 캐릭터 (혼자 걷기 · 반응 · 잡기 · 던지기) ---------- */
 (function () {
-  var stage = document.getElementById('stage'), el = document.getElementById('ddc');
-  if (!stage || !el) return;
-  var img = document.getElementById('ddcImg'), sh = document.getElementById('ddcShadow'), hint = document.getElementById('ddcHint');
-  var P = { idle: 'jump', grab: 'surprise', fly: 'party', ouch: 'sad', happy: ['heart', 'cheer', 'shy'] };
-  var cache = {};
-  ['jump', 'surprise', 'party', 'sad', 'heart', 'cheer', 'shy'].forEach(function (k) { var i = new Image(); i.src = 'assets/ddc-' + k + '-p.webp'; cache[k] = i; });
-  var pose = '', poseLock = 0;
-  function setPose(k, lockMs) {
-    if (k === pose) return; pose = k; img.src = 'assets/ddc-' + k + '-p.webp';
-    poseLock = lockMs ? performance.now() + lockMs : 0;
+  var stage = document.getElementById('stage'), el = document.getElementById('ddc'), cv = document.getElementById('ddcCv');
+  if (!stage || !el || !cv) return;
+  var g = cv.getContext('2d'), sh = document.getElementById('ddcShadow'), say = document.getElementById('ddcSay'),
+      fxBox = document.getElementById('ddcFx'), hint = document.getElementById('ddcHint');
+
+  /* ===== 1. 픽셀 그림 (24 x 30) ===== */
+  var C = { G: '#8CC21E', GL: '#B9E356', GD: '#6C9A10', K: '#5B5B56', KL: '#7C7C76', KD: '#43433F', F: '#F5F2E7', FD: '#DEDACB', E: '#33332F', P: '#F2C2BC', O: '#EF7A1A', W: '#FFFFFF' };
+  function r(x, y, w, h, c) { g.fillStyle = C[c] || c; g.fillRect(x, y, w, h); }
+  function sprite(o) {             // o: {face, arms, legs, frame, look, sit}
+    g.clearRect(0, 0, 24, 30);
+    var dy = o.sit ? 2 : (o.bob || 0);
+    g.save(); g.translate(0, dy);
+    // 안테나 C
+    r(11, 0, 5, 2, 'G'); r(10, 1, 2, 4, 'G'); r(11, 4, 4, 2, 'G'); r(12, 0, 2, 1, 'GL');
+    // 고리
+    r(9, 6, 6, 1, 'K'); r(8, 7, 2, 3, 'K'); r(14, 7, 2, 3, 'K'); r(10, 7, 4, 3, 'G'); r(10, 6, 2, 1, 'KL');
+    // 팔 (두건 뒤)
+    if (o.arms === 'up') { r(1, 14, 3, 5, 'K'); r(20, 14, 3, 5, 'K'); }
+    if (o.arms === 'wave') { r(20, 12 + (o.frame % 2), 3, 6, 'K'); }
+    // 몸통 · 다리
+    var L = o.legs || 'stand', f = o.frame || 0;
+    if (L === 'stand') { r(8, 25, 3, 4, 'KD'); r(13, 25, 3, 4, 'KD'); }
+    if (L === 'walk') { var a = [4, 3, 2, 3][f % 4], b = [2, 3, 4, 3][f % 4]; r(8, 25, 3, a, 'KD'); r(13, 25, 3, b, 'KD'); }
+    if (L === 'dangle') { r(8 + (f % 2), 25, 3, 5, 'KD'); r(13 - (f % 2), 25, 3, 5, 'KD'); }
+    if (L === 'tuck') { r(7, 24, 4, 3, 'KD'); r(13, 24, 4, 3, 'KD'); }
+    if (L === 'sit') { r(6, 25, 4, 2, 'KD'); r(14, 25, 4, 2, 'KD'); }
+    r(6, 20, 12, 5, 'K'); r(7, 25, 10, 1, 'KD'); r(7, 20, 3, 1, 'KL');
+    if (!o.arms || o.arms === 'down') { r(4, 21, 2, 3, 'K'); r(18, 21, 2, 3, 'K'); }
+    if (o.arms === 'wave') { r(4, 21, 2, 3, 'K'); }
+    if (o.arms === 'point') { r(1, 21, 5, 2, 'K'); r(18, 21, 2, 3, 'K'); }
+    if (o.arms === 'hug') { r(5, 21, 3, 2, 'K'); r(16, 21, 3, 2, 'K'); }
+    // 두건
+    r(7, 9, 10, 1, 'G'); r(5, 10, 14, 1, 'G'); r(4, 11, 16, 1, 'G'); r(3, 12, 18, 8, 'G'); r(4, 20, 16, 1, 'GD');
+    r(19, 13, 2, 7, 'GD'); r(3, 19, 2, 1, 'GD'); r(5, 11, 4, 1, 'GL'); r(4, 12, 2, 2, 'GL'); r(7, 10, 2, 1, 'GL');
+    // 얼굴
+    r(7, 13, 10, 1, 'F'); r(6, 14, 12, 5, 'F'); r(7, 19, 10, 1, 'FD'); r(7, 14, 2, 1, 'W');
+    r(6, 17, 2, 1, 'P'); r(16, 17, 2, 1, 'P'); r(11, 17, 2, 1, 'G');
+    var lx = o.look || 0, fc = o.face || 'normal';
+    if (fc === 'normal') { r(8 + lx, 15, 2, 2, 'E'); r(14 + lx, 15, 2, 2, 'E'); }
+    if (fc === 'blink' || fc === 'sleep') { r(8 + lx, 16, 2, 1, 'E'); r(14 + lx, 16, 2, 1, 'E'); }
+    if (fc === 'happy') { r(7, 16, 1, 1, 'E'); r(8, 15, 1, 1, 'E'); r(9, 16, 1, 1, 'E'); r(14, 16, 1, 1, 'E'); r(15, 15, 1, 1, 'E'); r(16, 16, 1, 1, 'E'); r(10, 18, 4, 1, 'E'); r(11, 18, 2, 1, 'O'); }
+    if (fc === 'wink') { r(8, 15, 2, 2, 'E'); r(14, 16, 1, 1, 'E'); r(15, 15, 1, 1, 'E'); r(16, 16, 1, 1, 'E'); r(10, 18, 4, 1, 'E'); r(11, 18, 2, 1, 'O'); }
+    if (fc === 'surprise') { r(8, 14, 2, 3, 'E'); r(14, 14, 2, 3, 'E'); r(11, 18, 2, 1, 'E'); }
+    if (fc === 'dizzy') { [[7, 14], [9, 14], [8, 15], [7, 16], [9, 16], [14, 14], [16, 14], [15, 15], [14, 16], [16, 16]].forEach(function (p) { r(p[0], p[1], 1, 1, 'E'); }); r(10, 18, 1, 1, 'E'); r(11, 18, 1, 1, 'F'); r(12, 18, 1, 1, 'E'); r(13, 18, 1, 1, 'F'); }
+    if (fc === 'sleep') { r(11, 18, 2, 1, 'FD'); }
+    g.restore();
   }
 
-  var W, H, S, GROUND, x, y, vx = 0, vy = 0, rot = 0, vr = 0, home, grounded = true, dragging = false, idleT = 0, touched = false;
-  var GRAV = 2400, mobile, CW, MINX = 0, MINY = -9999;
-  // 글자(슬로건·제목·설명·버튼·숫자) 영역을 재서, 캐릭터가 그 위로 못 들어가게 막아요
+  /* ===== 2. 크기 · 놀이 영역 (글자 영역은 못 들어감) ===== */
+  var SC, CW, CH, W, H, GROUND, MINX, MINY, mobile;
   function textBox() {
-    var r = stage.getBoundingClientRect(), R = 0, B = 0;
+    var rr = stage.getBoundingClientRect(), R = 0, B = 0;
     ['.hl .slogan', '.hl .chip', '.hl h1', '.hl .lead', '.hl .cta', '.hl .stats'].forEach(function (q) {
       var e = stage.querySelector(q); if (!e) return; var b = e.getBoundingClientRect();
-      R = Math.max(R, b.right - r.left); B = Math.max(B, b.bottom - r.top);
+      R = Math.max(R, b.right - rr.left); B = Math.max(B, b.bottom - rr.top);
     });
     return { right: R, bottom: B };
   }
+  var x, y, vx = 0, vy = 0, ang = 0, va = 0, face = 1;
   function measure(first) {
-    var r = stage.getBoundingClientRect(); W = r.width; H = r.height; mobile = W < 700;
-    S = mobile ? 135 : Math.min(250, H * .42);          // 캐릭터 높이 (작게)
-    CW = S * .85;
-    el.style.width = CW + 'px'; el.style.height = S + 'px';
-    GROUND = H - (mobile ? 22 : 34);                    // 발이 닿는 높이
+    var rr = stage.getBoundingClientRect(); W = rr.width; H = rr.height; mobile = W < 700;
+    SC = mobile ? 4 : 6; CW = 24 * SC; CH = 30 * SC;
+    el.style.width = CW + 'px'; el.style.height = CH + 'px';
+    GROUND = H - (mobile ? 20 : 32);
     var tb = textBox();
-    if (mobile) { MINX = 0; MINY = tb.bottom + 10; }    // 모바일: 글자 아래 띠에서만 놀기
-    else { MINX = tb.right + 24; MINY = -S * .4; }      // PC: 글자 오른쪽에서만 놀기
-    home = mobile ? W - CW - 16 : Math.max(MINX + 20, W - CW - 250);
-    if (first) { x = home; y = GROUND - S; }
-    x = Math.min(Math.max(x, MINX), W - CW); y = Math.max(Math.min(y, GROUND - S), MINY);
+    if (mobile) { MINX = 0; MINY = tb.bottom + 8; } else { MINX = tb.right + 24; MINY = -CH * .3; }
+    if (first) { x = mobile ? W - CW - 24 : Math.max(MINX + 40, W - CW - 280); y = GROUND - CH; }
+    x = Math.min(Math.max(x, MINX), W - CW); y = Math.max(Math.min(y, GROUND - CH), MINY);
   }
-  measure(true);
-  addEventListener('resize', function () { measure(false); });
+  measure(true); addEventListener('resize', function () { measure(false); });
+  if ('ResizeObserver' in window) new ResizeObserver(function () { measure(false); }).observe(stage);
+  addEventListener('load', function () { measure(false); });
 
-  function draw() {
-    var sq = 1, st = 1;
-    if (grounded && !dragging) { var b = Math.max(0, Math.min(1, impact)); sq = 1 - b * .12; st = 1 + b * .1; }
-    el.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + rot + 'deg)';
-    img.style.transform = 'translateX(-50%) scale(' + st + ',' + sq + ')';
-    img.style.transformOrigin = '50% 100%';
-    var lift = Math.max(0, (GROUND - S) - y), k = Math.max(.25, 1 - lift / 500);
-    sh.style.transform = 'translate(' + (x + CW / 2 - 70) + 'px,' + (GROUND - 10) + 'px) scale(' + k + ')';
-    sh.style.opacity = k;
-    hint.style.transform = 'translate(' + Math.min(W - 150, Math.max(MINX, x - 30)) + 'px,' + Math.max(MINY, y - 30) + 'px)';
+  /* ===== 3. 말풍선 · 효과 ===== */
+  var sayT = 0;
+  function talk(t, ms) { say.textContent = t; say.classList.add('on'); sayT = performance.now() + (ms || 1600); }
+  function fx(ch, cls, n) {
+    for (var k = 0; k < (n || 1); k++) (function (k) {
+      setTimeout(function () {
+        var i = document.createElement('i'); i.textContent = ch; if (cls) i.className = cls;
+        i.style.left = (x + CW * (.3 + Math.random() * .4)) + 'px'; i.style.top = (y + CH * .15) + 'px';
+        i.style.color = cls ? '' : ['#E0564A', '#F2A0C0', '#9CD818', '#FFC93C'][k % 4];
+        i.style.setProperty('--dx', ((Math.random() - .5) * 30) + 'px');
+        fxBox.appendChild(i); setTimeout(function () { i.remove(); }, 2100);
+      }, k * 120);
+    })(k);
+  }
+  var LINES = {
+    hello: ['안녕!', '반가워요!', '동두천 구경 왔어요?'],
+    tap: ['헤헤', '간지러워!', '또 눌러줘!', '질문 남겨줄래요?'],
+    grab: ['으앗!', '어디 가요?!', '살살 해줘요~'],
+    wall: ['아야!', '쿵!', '벽이다!'],
+    dizzy: ['어지러워…', '별이 보여요…', '빙글빙글~'],
+    land: ['착지!', '또 던져줘!', '10점 만점!'],
+    idle: ['소요산 가고 싶다~', '오늘 날씨 좋다!', '질문은 왼쪽에서!', '영상도 보고 가요!'],
+    wake: ['깜짝이야!', '안 잤어요!'],
+    night: ['졸려…', '노을 예쁘다~'], morning: ['좋은 아침!', '해가 떴다!']
+  };
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+  /* ===== 4. 상태 머신 ===== */
+  var state = 'idle', t = 0, frame = 0, ft = 0, target = 0, nextAct = 2, blinkT = 3, sq = 0, lastTouch = performance.now(),
+      pointer = { x: -999, y: -999, t: 0 }, helloAt = 0, held = false, grabOff = { x: 0, y: 0 }, trail = [], downAt = 0, moved = 0, landSpd = 0;
+  function set(s) { state = s; t = 0; frame = 0; }
+  function onGround() { return y >= GROUND - CH - .5; }
+
+  function decide() {
+    var rnd = Math.random();
+    if (rnd < .6) { target = MINX + Math.random() * (W - CW - MINX); set('walk'); }
+    else if (rnd < .72) { set('hop'); vy = -520; }
+    else if (rnd < .85) { set('point'); if (!mobile) talk(pick(LINES.idle), 2000); }
+    else { set('idle'); talk(pick(LINES.idle), 1800); }
+    nextAct = 1.6 + Math.random() * 3;
   }
 
-  var impact = 0, last = performance.now();
+  var last = performance.now();
   function step(now) {
-    var dt = Math.min(.033, (now - last) / 1000); last = now;
-    if (!dragging) {
-      vy += GRAV * dt; x += vx * dt; y += vy * dt; rot += vr * dt;
-      var maxX = W - CW;
-      if (x < MINX) { x = MINX; vx = Math.abs(vx) * .6; vr = -vr * .6; }
-      if (x > maxX) { x = maxX; vx = -Math.abs(vx) * .6; vr = -vr * .6; }
-      if (y < MINY) { y = MINY; vy = Math.abs(vy) * .5; }
-      if (y >= GROUND - S) {
-        var hit = vy;
-        y = GROUND - S;
-        if (hit > 260) {
-          vy = -hit * .42; vx *= .8; vr = vx * .25; impact = Math.min(1, hit / 1400);
-          if (hit > 1500 && performance.now() > poseLock) setPose(P.ouch, 1300);
-          grounded = false;
-        } else { vy = 0; grounded = true; vx *= Math.pow(.02, dt); vr = 0; }
-      } else grounded = false;
-      if (grounded) {
-        rot += (0 - rot) * Math.min(1, dt * 10);
-        if (Math.abs(vx) < 8) vx = 0;
-        idleT += dt;
-        if (performance.now() > poseLock && pose !== P.idle && !P.happy.includes(pose)) setPose(P.idle);
-        if (idleT > 2 && pose !== P.idle && performance.now() > poseLock) setPose(P.idle);
+    var dt = Math.min(.033, (now - last) / 1000); last = now; t += dt; ft += dt;
+    var near = Math.hypot(pointer.x - (x + CW / 2), pointer.y - (y + CH / 2)) < (mobile ? 0 : 190) && now - pointer.t < 1500;
+
+    if (!held) {
+      // 공중 물리
+      if (!onGround() || vy < 0) {
+        vy += 2200 * dt; x += vx * dt; y += vy * dt; ang += va * dt;
+        var maxX = W - CW;
+        if (x < MINX) { x = MINX; if (Math.abs(vx) > 400) { talk(pick(LINES.wall)); sq = .5; } vx = Math.abs(vx) * .55; va = -va * .5; }
+        if (x > maxX) { x = maxX; if (Math.abs(vx) > 400) { talk(pick(LINES.wall)); sq = .5; } vx = -Math.abs(vx) * .55; va = -va * .5; }
+        if (y < MINY) { y = MINY; vy = Math.abs(vy) * .4; }
+        if (y >= GROUND - CH) {
+          landSpd = vy; y = GROUND - CH;
+          if (vy > 650) { vy = -vy * .35; vx *= .7; va *= .6; sq = Math.min(1, landSpd / 1500); }
+          else {
+            vy = 0; sq = Math.min(.8, landSpd / 900);
+            if (state === 'fly') {
+              if (landSpd > 500 || Math.abs(ang) > 90) { set('dizzy'); talk(pick(LINES.dizzy), 1800); fx('★', '', 4); }
+              else { set('land'); if (Math.random() < .6) talk(pick(LINES.land)); }
+            } else if (state === 'hop' || state === 'happy') set('idle');
+          }
+        }
       } else {
-        idleT = 0;
-        if (performance.now() > poseLock && Math.abs(vy) > 500 && Math.hypot(vx, vy) > 900) setPose(P.fly);
+        // 땅 위
+        ang += (0 - ang) * Math.min(1, dt * 12); vx *= Math.pow(.001, dt);
+        if (state === 'idle' || state === 'point') {
+          if (near) { face = pointer.x < x + CW / 2 ? -1 : 1; if (now - helloAt > 9000) { helloAt = now; set('wave'); talk(pick(LINES.hello)); } }
+          if (t > nextAct) decide();
+          if (now - lastTouch > 25000 || stage.classList.contains('dusk')) set('sleep');
+        } else if (state === 'walk') {
+          var d = target - x; face = d < 0 ? -1 : 1;
+          var sp = (mobile ? 46 : 70) * (near ? .4 : 1);
+          if (Math.abs(d) < 4) { set('idle'); nextAct = 1 + Math.random() * 2.5; }
+          else x += Math.sign(d) * Math.min(Math.abs(d), sp * dt);
+          if (near && now - helloAt > 9000) { helloAt = now; set('wave'); talk(pick(LINES.hello)); }
+        } else if (state === 'wave' && t > 1.4) set('idle');
+        else if (state === 'land' && t > .5) set('idle');
+        else if (state === 'dizzy' && t > 1.9) { set('shake'); }
+        else if (state === 'shake' && t > .5) set('idle');
+        else if (state === 'sleep') {
+          if (ft > 1.3) { ft = 0; fx('Z', 'z'); }
+          if (!stage.classList.contains('dusk') && now - lastTouch < 25000) { set('idle'); talk(pick(LINES.wake)); }
+        } else if (state === 'fly') set('land');
       }
     }
-    impact *= Math.pow(.001, dt);
-    draw(); requestAnimationFrame(step);
+
+    // 프레임 · 깜빡임
+    if (ft > (state === 'walk' ? .14 : .22)) { ft = 0; frame++; }
+    blinkT -= dt; var blink = blinkT < 0 && blinkT > -.12; if (blinkT < -.12) blinkT = 2 + Math.random() * 3;
+    sq *= Math.pow(.002, dt);
+    if (sayT && now > sayT) { say.classList.remove('on'); sayT = 0; }
+
+    // 그리기
+    var look = near ? (pointer.x < x + CW / 2 ? -1 : 1) : (state === 'walk' ? face : 0), o;
+    switch (state) {
+      case 'walk': o = { face: blink ? 'blink' : 'normal', legs: 'walk', frame: frame, look: look, bob: frame % 2 ? -1 : 0 }; break;
+      case 'held': o = { face: 'surprise', legs: 'dangle', arms: 'up', frame: frame }; break;
+      case 'fly': o = { face: Math.hypot(vx, vy) > 900 ? 'surprise' : 'happy', legs: 'tuck', arms: 'up' }; break;
+      case 'hop': case 'happy': o = { face: 'happy', legs: 'tuck', arms: 'up' }; break;
+      case 'wave': o = { face: 'wink', arms: 'wave', frame: frame, legs: 'stand' }; break;
+      case 'point': o = { face: blink ? 'blink' : 'normal', arms: 'point', look: -1, legs: 'stand' }; break;
+      case 'dizzy': o = { face: 'dizzy', legs: 'sit', sit: true, arms: 'down' }; break;
+      case 'shake': o = { face: 'blink', legs: 'stand', look: frame % 2 ? 1 : -1 }; break;
+      case 'land': o = { face: 'happy', legs: 'stand', arms: 'up' }; break;
+      case 'sleep': o = { face: 'sleep', legs: 'sit', sit: true, arms: 'hug' }; break;
+      default: o = { face: blink ? 'blink' : 'normal', legs: 'stand', look: look, bob: Math.sin(t * 3) > .6 ? -1 : 0 };
+    }
+    sprite(o);
+    var sx = 1 + sq * .22, sy = 1 - sq * .2, flip = (state === 'point') ? 1 : 1;
+    if (state === 'dizzy') ang = Math.sin(t * 10) * 6;
+    if (state === 'shake') ang = Math.sin(t * 40) * 5;
+    el.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + ang + 'deg)';
+    cv.style.transform = 'scale(' + (sx * flip) + ',' + sy + ')';
+    var lift = Math.max(0, (GROUND - CH) - y), k = Math.max(.25, 1 - lift / 420);
+    sh.style.transform = 'translate(' + (x + CW / 2 - 55) + 'px,' + (GROUND - 8) + 'px) scale(' + k + ')'; sh.style.opacity = k;
+    say.style.transform = 'translate(-50%,0) translate(' + Math.min(W - 70, Math.max(70, x + CW / 2)) + 'px,' + Math.max(4, y - 44) + 'px)';
+    hint.style.transform = 'translate(' + Math.min(W - 200, Math.max(MINX, x - 40)) + 'px,' + Math.max(MINY, y - 40) + 'px)';
+    requestAnimationFrame(step);
   }
   requestAnimationFrame(step);
+  setTimeout(function () { talk(pick(LINES.hello), 1800); }, 1200);
 
-  // 잡기 · 던지기
-  var off = { x: 0, y: 0 }, trail = [], downAt = 0, moved = 0;
-  function local(e) { var r = stage.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top, t: performance.now() }; }
+  /* ===== 5. 마우스 · 터치 ===== */
+  function local(e) { var rr = stage.getBoundingClientRect(); return { x: e.clientX - rr.left, y: e.clientY - rr.top, t: performance.now() }; }
+  stage.addEventListener('pointermove', function (e) { var p = local(e); pointer.x = p.x; pointer.y = p.y; pointer.t = p.t; });
+  stage.addEventListener('pointerleave', function () { pointer.t = 0; });
+  var hinted = false;
+  function touch() { lastTouch = performance.now(); if (!hinted) { hinted = true; hint.classList.add('off'); } }
+
   el.addEventListener('pointerdown', function (e) {
-    e.preventDefault(); el.setPointerCapture(e.pointerId);
-    var p = local(e); off.x = p.x - x; off.y = p.y - y; trail = [p]; downAt = p.t; moved = 0;
-    dragging = true; el.classList.add('grab'); setPose(P.grab); vx = vy = vr = 0;
-    if (!touched) { touched = true; hint.classList.add('off'); }
+    e.preventDefault(); el.setPointerCapture(e.pointerId); touch();
+    var wasSleep = state === 'sleep';
+    var p = local(e); grabOff.x = p.x - x; grabOff.y = p.y - y; trail = [p]; downAt = p.t; moved = 0;
+    held = true; el.classList.add('grab'); vx = vy = va = 0;
+    el.style.transformOrigin = grabOff.x + 'px ' + grabOff.y + 'px';
+    set('held'); talk(wasSleep ? pick(LINES.wake) : pick(LINES.grab), 1200);
   });
   el.addEventListener('pointermove', function (e) {
-    if (!dragging) return;
-    var p = local(e); moved += Math.hypot(p.x - trail[trail.length - 1].x, p.y - trail[trail.length - 1].y);
+    if (!held) return;
+    var p = local(e), l = trail[trail.length - 1]; moved += Math.hypot(p.x - l.x, p.y - l.y);
     trail.push(p); if (trail.length > 6) trail.shift();
-    var nx = p.x - off.x, ny = p.y - off.y;
-    rot = Math.max(-35, Math.min(35, (nx - x) * 1.6));
-    x = Math.min(Math.max(nx, MINX), W - CW); y = Math.min(Math.max(ny, MINY), GROUND - S);
+    var nx = Math.min(Math.max(p.x - grabOff.x, MINX), W - CW), ny = Math.min(Math.max(p.y - grabOff.y, MINY), GROUND - CH);
+    // 잡힌 지점을 축으로 대롱대롱 흔들림 (움직인 방향 반대로 기울기)
+    var mvx = (nx - x) / Math.max(.001, (p.t - l.t) / 1000);
+    va += (-mvx * .02 - ang * 18 - va * 4) * .016 * 6;
+    x = nx; y = ny;
   });
-  function release(e) {
-    if (!dragging) return; dragging = false; el.classList.remove('grab');
+  // 잡고 있는 동안 진자 운동
+  (function swing() { if (held) { va += (-ang * 30 - va * 5) * .016; ang = Math.max(-70, Math.min(70, ang + va * .016)); } requestAnimationFrame(swing); })();
+
+  function release() {
+    if (!held) return; held = false; el.classList.remove('grab'); el.style.transformOrigin = '50% 50%';
     var a = trail[0], b = trail[trail.length - 1], dt = Math.max(16, b.t - a.t) / 1000;
-    if (moved < 6 && b.t - downAt < 300) {               // 톡 누르면 깡총 + 기분 좋은 표정
-      vy = -900; vx = (Math.random() - .5) * 200; vr = (Math.random() - .5) * 200;
-      setPose(P.happy[Math.floor(Math.random() * P.happy.length)], 1800);
-    } else {
-      vx = Math.max(-3200, Math.min(3200, (b.x - a.x) / dt));
-      vy = Math.max(-3200, Math.min(3200, (b.y - a.y) / dt));
-      vr = vx * .35; setPose(P.fly, 400);
+    if (moved < 6 && b.t - downAt < 320) {          // 톡: 깡총 + 하트
+      set('happy'); vy = -620; vx = 0; va = 0; ang = 0;
+      fx('♥', '', 3); talk(pick(LINES.tap), 1500);
+    } else {                                         // 던지기
+      vx = Math.max(-2600, Math.min(2600, (b.x - a.x) / dt));
+      vy = Math.max(-2600, Math.min(2600, (b.y - a.y) / dt));
+      va = vx * .3 + ang * 2; set('fly');
+      if (Math.hypot(vx, vy) < 120) { vy = Math.max(vy, 0); }
     }
-    grounded = false; idleT = 0;
   }
-  el.addEventListener('pointerup', release);
-  el.addEventListener('pointercancel', release);
+  el.addEventListener('pointerup', release); el.addEventListener('pointercancel', release);
+
+  // 노을 ↔ 낮 반응
+  new MutationObserver(function () {
+    if (stage.classList.contains('dusk')) talk(pick(LINES.night), 1800);
+    else { lastTouch = performance.now(); talk(pick(LINES.morning), 1800); }
+  }).observe(stage, { attributes: true, attributeFilter: ['class'] });
 })();
