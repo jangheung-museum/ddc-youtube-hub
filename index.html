@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="proto-bar"><b>제안용 시안</b> · 2027 동두천시 공식 유튜브 운영 제안서 첨부 페이지이며, 동두천시 공식 사이트가 아닙니다.</div>
+<div class="proto-bar"><b>제안용 시안</b> · <span class="pl">2027 동두천시 공식 유튜브 운영 제안서 첨부 페이지이며, 동두천시 공식 사이트가 아닙니다.</span><span class="pm">동두천시 공식 사이트가 아닙니다</span></div>
 
 
 <nav><div class="wrap"><div class="bar">
@@ -77,10 +77,12 @@
       <div class="stats"><div class="st"><b id="statQ">128</b><span>이번 달 질문</span></div><div class="st"><b>12</b><span>답변 영상</span></div><div class="st"><b>3,402</b><span>누적 공감</span></div></div>
     </div>
 
-    <img class="hchar" src="assets/ddc-jump.webp" alt="DDC 캐릭터">
+    <div class="ddc-shadow" id="ddcShadow"></div>
+    <div class="ddc" id="ddc" role="button" aria-label="DDC 캐릭터 — 잡아서 던질 수 있어요"><img id="ddcImg" src="assets/ddc-jump-p.webp" alt="DDC 캐릭터" draggable="false"></div>
+    <div class="ddc-hint" id="ddcHint">잡아서 던져 보세요!</div>
     <svg class="sign" width="96" height="86" viewBox="0 0 96 86"><rect x="44" y="34" width="8" height="52" rx="2" fill="#8A6A44"/><rect x="4" y="6" width="88" height="34" rx="10" fill="#B88A55"/><rect x="4" y="6" width="88" height="29" rx="10" fill="#D4A66C"/><text x="48" y="28" text-anchor="middle" font-size="16" font-weight="900" fill="#4A3520" font-family="Pretendard,sans-serif">소요산</text></svg>
     <div class="glass g1"><small>보산동 · 산책러</small>소요산 주차 언제 늘어나요?</div>
-    <div class="glass g2"><small>답변 영상 업로드</small><b>▶</b> 시장이 직접 답했어요</div>
+    <div class="glass g2" data-video="answer" style="cursor:pointer"><small>답변 영상 업로드</small><b>▶</b> 시장이 직접 답했어요</div>
   </div>
 </div></header>
 
@@ -112,7 +114,7 @@
 <section id="ask"><div class="wrap ask">
   <div class="askL grain">
     <span class="eye light">ASK</span><h2>질문 하나면<br><span style="color:#9CD818">충분해요</span></h2>
-    <p>글로 써도 좋고, 휴대폰으로 15초 영상을 찍어 보내도 좋아요. 선정된 질문은 영상으로 답해 드려요.</p>
+    <p>글로 써도 좋고, 15초 영상을 찍어 보내도 좋아요.<br>선정된 질문은 영상으로 답해 드려요.</p>
     <ul><li>① 닉네임과 질문만 남기면 끝</li><li>② 공감이 많을수록 우선 선정</li><li>③ 답변 영상이 올라오면 알림</li></ul>
     <img src="assets/ddc-point.webp" alt="" style="position:absolute;right:18px;bottom:-6px;height:250px">
   </div>
@@ -155,14 +157,14 @@
   <div class="bn c1 grain">
     <span class="pill">상시 공모</span>
     <h3>내가 찍은 동두천을<br>보내 주세요</h3>
-    <p>풍경, 단골집, 옛날 사진 무엇이든 좋아요. 채택되면 공식 채널에 소개되고 소정의 상품을 드려요.</p>
+    <p>풍경, 단골집, 옛날 사진 무엇이든 좋아요.<br>채택되면 공식 채널에 소개되고 소정의 상품을 드려요.</p>
     <a class="btn lime sm" data-go="ask" data-cat="사진·영상 공모">사진·영상 올리기</a>
     <img class="deco" src="assets/ddc-heart.webp" alt="" style="height:220px;right:18px;bottom:0">
   </div>
   <div class="bn c2 grain">
     <span class="pill" style="color:#A9443A">이번 주 이벤트</span>
     <h3>신비한 동두천 사전<br>댓글 퀴즈</h3>
-    <p style="max-width:280px">Q. 소요산 자재암을 세운 스님은? 정답을 댓글로 남기면 추첨으로 선물을 드려요.</p>
+    <p style="max-width:280px">Q. 소요산 자재암을 세운 스님은?<br>정답을 댓글로 남기면 추첨으로 선물을 드려요.</p>
     <button class="btn cream sm" id="quizBtn">정답 맞히러 가기</button>
     <img class="deco" src="assets/ddc-party.webp" alt="" style="height:230px;right:14px;bottom:-4px">
   </div>
@@ -178,7 +180,7 @@
 <div class="tabbar">
   <a href="#top" class="on"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z" fill="currentColor"/></svg>홈</a>
   <a data-go="series"><svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg>영상</a>
-  <a data-go="ask"><div class="fab"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#22300A" stroke-width="3.2" stroke-linecap="round"/></svg></div>질문하기</a>
+  <a data-go="ask" class="tabask"><div class="fab"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#22300A" stroke-width="3.2" stroke-linecap="round"/></svg></div>질문하기</a>
   <a data-go="answer"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>공감</a>
   <a data-go="events"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z" fill="none" stroke="currentColor" stroke-width="2"/></svg>이벤트</a>
 </div>

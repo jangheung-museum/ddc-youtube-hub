@@ -249,10 +249,11 @@ input.input:focus,textarea.input:focus{box-shadow:inset 0 2px 5px rgba(60,60,40,
   .menu{display:none}
   .brand img{height:36px}
   .stage{min-height:auto;border-radius:30px}
-  .hl{padding:30px 22px 270px;max-width:none}
+  .hl{padding:30px 22px 175px;max-width:none}
+  .stage{-webkit-user-select:none;user-select:none}
   .slogan{height:44px;margin-bottom:14px}
   h1{font-size:38px}
-  .lead{font-size:15px}.lead br{display:none}
+  .lead{font-size:15px}
   .cta{flex-wrap:wrap;margin-bottom:20px}
   .btn{padding:13px 20px;font-size:15px}
   .stats{gap:8px}.st{min-width:0;flex:1;padding:10px 12px}.st b{font-size:20px}
@@ -284,7 +285,7 @@ input.input:focus,textarea.input:focus{box-shadow:inset 0 2px 5px rgba(60,60,40,
   footer .wrap{flex-direction:column;gap:18px;align-items:flex-start}
   footer{padding-bottom:110px}
   .tabbar{display:flex;position:fixed;left:12px;right:12px;bottom:12px;z-index:60;height:70px;border-radius:24px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);box-shadow:0 12px 30px -8px rgba(40,60,45,.4);justify-content:space-around;align-items:center}
-  .tabbar a{font-size:11px;font-weight:800;color:#7D8077;text-align:center;width:60px}
+  .tabbar a{display:flex;flex-direction:column;align-items:center;justify-content:center;height:52px;font-size:11px;font-weight:800;color:#7D8077;text-align:center;width:60px;line-height:1.2}
   .tabbar a svg{display:block;margin:0 auto 3px}
   .tabbar a.on{color:var(--green)}
   .tabbar .fab{width:56px;height:56px;border-radius:20px;margin:-26px auto 3px;display:grid;place-items:center;background:linear-gradient(180deg,#B7EA3C,#97D016);box-shadow:0 5px 0 #6F9E0C,0 12px 18px -6px rgba(80,120,10,.55)}
@@ -292,3 +293,31 @@ input.input:focus,textarea.input:focus{box-shadow:inset 0 2px 5px rgba(60,60,40,
 }
 @media (max-width:520px){ .flow{grid-template-columns:1fr} h1{font-size:34px} }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== 가독성 · 정렬 보정 ===== */
+body{word-break:keep-all;overflow-wrap:break-word}
+p,.lead,li,.bn p,.step span{text-wrap:pretty}
+h1,h2,h3,h4{text-wrap:balance}
+.lead{max-width:34em}
+.askL p,.bn p{line-height:1.7}
+nav .btn.coral{transform:translateY(-2px);box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 -2px 0 rgba(0,0,0,.12) inset,0 3px 0 #9E4136,0 8px 16px -6px rgba(160,60,50,.45)}
+nav .btn.coral:active{transform:translateY(1px)}
+.proto-bar .pm{display:none}
+@media (max-width:980px){
+  .proto-bar{font-size:12px;padding:7px 12px}
+  .proto-bar .pl{display:none}.proto-bar .pm{display:inline}
+  .lead{font-size:15px;line-height:1.7}
+  .tabbar .fab{width:28px;height:28px;border-radius:9px;margin:-3px auto 6px;flex:none;box-shadow:0 3px 0 #6F9E0C,0 6px 10px -4px rgba(80,120,10,.45)}
+  .tabbar .fab svg{width:16px;height:16px;margin:0!important}
+  .tabbar a.tabask{color:#46640A}
+}
+
+/* ===== DDC 캐릭터 놀이 ===== */
+.g2{animation:none}
+.ddc{position:absolute;left:0;top:0;z-index:6;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;will-change:transform}
+.ddc img{position:absolute;left:50%;bottom:0;height:100%;transform:translateX(-50%);pointer-events:none;filter:drop-shadow(0 10px 10px rgba(40,70,30,.18));transition:transform .12s}
+.ddc.grab{cursor:grabbing}
+.ddc-shadow{position:absolute;left:0;top:0;z-index:2;width:140px;height:22px;border-radius:50%;background:radial-gradient(closest-side,rgba(40,60,30,.32),rgba(40,60,30,0));pointer-events:none;will-change:transform,opacity}
+.ddc-hint{position:absolute;left:0;top:0;z-index:7;background:#2F3B32;color:#fff;font-size:13px;font-weight:900;padding:8px 12px;border-radius:12px 12px 12px 3px;white-space:nowrap;pointer-events:none;box-shadow:0 8px 18px -8px rgba(0,0,0,.45);transition:opacity .4s}
+.ddc-hint.off{opacity:0}
+@media (max-width:980px){ .ddc-hint{font-size:12px} }

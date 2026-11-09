@@ -207,3 +207,124 @@
     toast(st.classList.contains('dusk') ? '소요산에 노을이 졌어요' : '다시 맑은 낮이에요');
   });
 })();
+
+/* ---------- DDC 캐릭터 놀이 (잡기 · 던지기 · 튕기기) ---------- */
+(function () {
+  var stage = document.getElementById('stage'), el = document.getElementById('ddc');
+  if (!stage || !el) return;
+  var img = document.getElementById('ddcImg'), sh = document.getElementById('ddcShadow'), hint = document.getElementById('ddcHint');
+  var P = { idle: 'jump', grab: 'surprise', fly: 'party', ouch: 'sad', happy: ['heart', 'cheer', 'shy'] };
+  var cache = {};
+  ['jump', 'surprise', 'party', 'sad', 'heart', 'cheer', 'shy'].forEach(function (k) { var i = new Image(); i.src = 'assets/ddc-' + k + '-p.webp'; cache[k] = i; });
+  var pose = '', poseLock = 0;
+  function setPose(k, lockMs) {
+    if (k === pose) return; pose = k; img.src = 'assets/ddc-' + k + '-p.webp';
+    poseLock = lockMs ? performance.now() + lockMs : 0;
+  }
+
+  var W, H, S, GROUND, x, y, vx = 0, vy = 0, rot = 0, vr = 0, home, grounded = true, dragging = false, idleT = 0, touched = false;
+  var GRAV = 2400, mobile, CW, MINX = 0, MINY = -9999;
+  // 글자(슬로건·제목·설명·버튼·숫자) 영역을 재서, 캐릭터가 그 위로 못 들어가게 막아요
+  function textBox() {
+    var r = stage.getBoundingClientRect(), R = 0, B = 0;
+    ['.hl .slogan', '.hl .chip', '.hl h1', '.hl .lead', '.hl .cta', '.hl .stats'].forEach(function (q) {
+      var e = stage.querySelector(q); if (!e) return; var b = e.getBoundingClientRect();
+      R = Math.max(R, b.right - r.left); B = Math.max(B, b.bottom - r.top);
+    });
+    return { right: R, bottom: B };
+  }
+  function measure(first) {
+    var r = stage.getBoundingClientRect(); W = r.width; H = r.height; mobile = W < 700;
+    S = mobile ? 135 : Math.min(250, H * .42);          // 캐릭터 높이 (작게)
+    CW = S * .85;
+    el.style.width = CW + 'px'; el.style.height = S + 'px';
+    GROUND = H - (mobile ? 22 : 34);                    // 발이 닿는 높이
+    var tb = textBox();
+    if (mobile) { MINX = 0; MINY = tb.bottom + 10; }    // 모바일: 글자 아래 띠에서만 놀기
+    else { MINX = tb.right + 24; MINY = -S * .4; }      // PC: 글자 오른쪽에서만 놀기
+    home = mobile ? W - CW - 16 : Math.max(MINX + 20, W - CW - 250);
+    if (first) { x = home; y = GROUND - S; }
+    x = Math.min(Math.max(x, MINX), W - CW); y = Math.max(Math.min(y, GROUND - S), MINY);
+  }
+  measure(true);
+  addEventListener('resize', function () { measure(false); });
+
+  function draw() {
+    var sq = 1, st = 1;
+    if (grounded && !dragging) { var b = Math.max(0, Math.min(1, impact)); sq = 1 - b * .12; st = 1 + b * .1; }
+    el.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + rot + 'deg)';
+    img.style.transform = 'translateX(-50%) scale(' + st + ',' + sq + ')';
+    img.style.transformOrigin = '50% 100%';
+    var lift = Math.max(0, (GROUND - S) - y), k = Math.max(.25, 1 - lift / 500);
+    sh.style.transform = 'translate(' + (x + CW / 2 - 70) + 'px,' + (GROUND - 10) + 'px) scale(' + k + ')';
+    sh.style.opacity = k;
+    hint.style.transform = 'translate(' + Math.min(W - 150, Math.max(MINX, x - 30)) + 'px,' + Math.max(MINY, y - 30) + 'px)';
+  }
+
+  var impact = 0, last = performance.now();
+  function step(now) {
+    var dt = Math.min(.033, (now - last) / 1000); last = now;
+    if (!dragging) {
+      vy += GRAV * dt; x += vx * dt; y += vy * dt; rot += vr * dt;
+      var maxX = W - CW;
+      if (x < MINX) { x = MINX; vx = Math.abs(vx) * .6; vr = -vr * .6; }
+      if (x > maxX) { x = maxX; vx = -Math.abs(vx) * .6; vr = -vr * .6; }
+      if (y < MINY) { y = MINY; vy = Math.abs(vy) * .5; }
+      if (y >= GROUND - S) {
+        var hit = vy;
+        y = GROUND - S;
+        if (hit > 260) {
+          vy = -hit * .42; vx *= .8; vr = vx * .25; impact = Math.min(1, hit / 1400);
+          if (hit > 1500 && performance.now() > poseLock) setPose(P.ouch, 1300);
+          grounded = false;
+        } else { vy = 0; grounded = true; vx *= Math.pow(.02, dt); vr = 0; }
+      } else grounded = false;
+      if (grounded) {
+        rot += (0 - rot) * Math.min(1, dt * 10);
+        if (Math.abs(vx) < 8) vx = 0;
+        idleT += dt;
+        if (performance.now() > poseLock && pose !== P.idle && !P.happy.includes(pose)) setPose(P.idle);
+        if (idleT > 2 && pose !== P.idle && performance.now() > poseLock) setPose(P.idle);
+      } else {
+        idleT = 0;
+        if (performance.now() > poseLock && Math.abs(vy) > 500 && Math.hypot(vx, vy) > 900) setPose(P.fly);
+      }
+    }
+    impact *= Math.pow(.001, dt);
+    draw(); requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+
+  // 잡기 · 던지기
+  var off = { x: 0, y: 0 }, trail = [], downAt = 0, moved = 0;
+  function local(e) { var r = stage.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top, t: performance.now() }; }
+  el.addEventListener('pointerdown', function (e) {
+    e.preventDefault(); el.setPointerCapture(e.pointerId);
+    var p = local(e); off.x = p.x - x; off.y = p.y - y; trail = [p]; downAt = p.t; moved = 0;
+    dragging = true; el.classList.add('grab'); setPose(P.grab); vx = vy = vr = 0;
+    if (!touched) { touched = true; hint.classList.add('off'); }
+  });
+  el.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var p = local(e); moved += Math.hypot(p.x - trail[trail.length - 1].x, p.y - trail[trail.length - 1].y);
+    trail.push(p); if (trail.length > 6) trail.shift();
+    var nx = p.x - off.x, ny = p.y - off.y;
+    rot = Math.max(-35, Math.min(35, (nx - x) * 1.6));
+    x = Math.min(Math.max(nx, MINX), W - CW); y = Math.min(Math.max(ny, MINY), GROUND - S);
+  });
+  function release(e) {
+    if (!dragging) return; dragging = false; el.classList.remove('grab');
+    var a = trail[0], b = trail[trail.length - 1], dt = Math.max(16, b.t - a.t) / 1000;
+    if (moved < 6 && b.t - downAt < 300) {               // 톡 누르면 깡총 + 기분 좋은 표정
+      vy = -900; vx = (Math.random() - .5) * 200; vr = (Math.random() - .5) * 200;
+      setPose(P.happy[Math.floor(Math.random() * P.happy.length)], 1800);
+    } else {
+      vx = Math.max(-3200, Math.min(3200, (b.x - a.x) / dt));
+      vy = Math.max(-3200, Math.min(3200, (b.y - a.y) / dt));
+      vr = vx * .35; setPose(P.fly, 400);
+    }
+    grounded = false; idleT = 0;
+  }
+  el.addEventListener('pointerup', release);
+  el.addEventListener('pointercancel', release);
+})();
