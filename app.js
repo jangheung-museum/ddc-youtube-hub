@@ -251,7 +251,7 @@
     return rows.slice(1).map(function (r) {
       var g = function (k) { return ix[k] > -1 ? (r[ix[k]] || '').trim() : ''; };
       return { pub: g('pub'), cat: g('cat'), nick: g('nick'), town: g('town'), q: g('q'), a: g('a'), fmt: g('fmt'), vid: g('vid'), date: (function (d) { var m = d.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/); return m ? m[1] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2) : d; })(g('date')) };
-    }).filter(function (o) { return /^(y|yes|o|공개|예|✔|true)$/i.test(o.pub) && o.a; }).reverse();
+    }).filter(function (o) { return (ix.pub < 0 || /^(y|yes|o|공개|예|✔|true)$/i.test(o.pub)) && o.a; }).reverse();
   }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function render() {
