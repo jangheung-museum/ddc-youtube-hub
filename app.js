@@ -46,6 +46,8 @@
   var CAT_TEXT = {
     '시장에게 묻기': ['질문 내용', '시장님께 궁금한 점을 자유롭게 적어 주세요.', '질문 보내기'],
     '담당자에게 물어봐 주세요': ['궁금한 정책·민원', '어떤 정책이나 민원이 궁금한가요? 담당자를 찾아가 대신 물어볼게요.', '대신 물어봐 주세요'],
+    '그냥 궁금해요': ['궁금한 것', '지명·역사·생활 등 동두천에 대해 그냥 궁금했던 것을 적어 주세요. "신비한 동두천 사전" 같은 AI 영상으로 풀어 드려요.', '궁금증 보내기'],
+    '사연 보내기': ['나의 동두천 사연', '동두천에서 겪은 따뜻한 일, 웃긴 일, 고마운 사람 이야기를 들려주세요. "공감 사연툰"으로 만들어요.', '사연 보내기'],
     '우리 가게 추천': ['가게 이름과 추천 이유', '가게 이름, 위치, 추천하는 이유를 적어 주세요. "마감 10분" 출연 후보가 돼요.', '가게 추천하기'],
     '사진·영상 공모': ['사진·영상 소개', '어디서 무엇을 찍었는지 알려 주세요. 링크는 아래 칸에 붙여 주세요.', '공모 참여하기']
   };
@@ -87,7 +89,7 @@
       btn.disabled = false; setCat(cat);
       var list = store.get('hub_sent', []); list.push(Object.assign({ at: new Date().toISOString() }, d)); store.set('hub_sent', list);
       var q = $('#statQ'); q.textContent = (parseInt(q.textContent.replace(/,/g, ''), 10) + 1).toLocaleString();
-      $('#doneMsg').textContent = (cat === '사진·영상 공모' || cat === '우리 가게 추천')
+      $('#doneMsg').textContent = (cat === '사진·영상 공모' || cat === '우리 가게 추천' || cat === '사연 보내기')
         ? '보내 주셔서 고마워요! 채택되면 공식 채널에서 소개해 드려요.'
         : '공감을 많이 받으면 다음 달 영상에서 답해 드려요.' + (GF ? '' : ' (시연 모드)');
       $('#askForm').reset(); $('#cnt').textContent = '0';
@@ -129,16 +131,17 @@
   });
 
   /* ---------- 영상 팝업 ---------- */
-  $$('[data-video]').forEach(function (el) {
-    el.addEventListener('click', function (e) {
-      if (e.target.closest('.like')) return;
-      var v = (C.videos || {})[el.dataset.video] || { title: '동두천시 유튜브', id: '' };
+  function openVideo(key) {
+      var v = (C.videos || {})[key] || { title: '동두천시 유튜브', id: '' };
       $('#vTitle').textContent = v.title;
       $('#vPlayer').innerHTML = v.id
         ? '<iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(v.id) + '?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'
         : '<div class="ph"><img src="assets/ddc-shy.webp" alt=""><b style="font-size:18px">영상 준비 중이에요</b><p style="color:#C9D6CC;margin-top:6px">사업 착수 후 이 자리에서 바로 재생돼요.</p></div>';
       openM('#mVideo');
-    });
+  }
+  window.__openVideo = openVideo;
+  $$('[data-video]').forEach(function (el) {
+    el.addEventListener('click', function (e) { if (e.target.closest('.like')) return; openVideo(el.dataset.video); });
   });
 
   /* ---------- 시리즈 필터 ---------- */
@@ -181,11 +184,11 @@
     var io = new IntersectionObserver(function (ents) {
       ents.forEach(function (en) {
         if (!en.isIntersecting) return; var id = en.target.id;
-        menuLinks.forEach(function (a) { a.classList.toggle('on', a.dataset.go === id && (id !== 'ask' || a.dataset.cat === cat)); });
+        menuLinks.forEach(function (a) { a.classList.toggle('on', a.dataset.go === id); });
         tabLinks.forEach(function (a) { a.classList.toggle('on', (a.dataset.go || 'top') === id); });
       });
     }, { rootMargin: '-45% 0px -50% 0px' });
-    ['top', 'answer', 'ask', 'how', 'series', 'events'].forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
+    ['top', 'ask', 'vote', 'board', 'series', 'events'].forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
   }
 
   /* ---------- 히어로: 해 · 시차 효과 ---------- */
@@ -206,6 +209,85 @@
     st.classList.toggle('dusk');
     toast(st.classList.contains('dusk') ? '소요산에 노을이 졌어요' : '다시 맑은 낮이에요');
   });
+})();
+
+/* ---------- 답변 게시판 (구글시트 '공개' 행 자동 표시) ---------- */
+(function () {
+  var grid = document.getElementById('bGrid'); if (!grid) return;
+  var C = window.HUB_CONFIG || {}, note = document.getElementById('bNote'), more = document.getElementById('bMore'), qInput = document.getElementById('bq');
+  var DEMO = [
+    { cat: '시장에게 묻기', nick: '산책러', town: '보산동', q: '소요산 주차장 언제 늘어나요?', a: '주차 확충 계획과 단풍철 대책을 시장이 영상에서 직접 설명했어요.', fmt: '시민이 묻고 시장이 답하다 EP.07', vid: 'answer', date: '2027-11-15' },
+    { cat: '그냥 궁금해요', nick: '궁금이', town: '생연동', q: '동두천은 왜 이름이 동두천이에요?', a: '시내를 흐르는 하천 이름에서 시 이름이 왔어요. 자세한 이야기는 영상에서!', fmt: '신비한 동두천 사전 EP.01', vid: 'dict', date: '2027-10-28' },
+    { cat: '담당자에게 물어봐 주세요', nick: '출근러', town: '생연동', q: '대형폐기물은 어떻게 버려요?', a: '신고 방법부터 배출 날짜까지 담당자가 단계별로 알려 줬어요.', fmt: '민원 대신 물어봄 EP.03', vid: 'proxy', date: '2027-10-20' },
+    { cat: '사연 보내기', nick: '우산요정', town: '지행동', q: '1호선에서 우산을 빌려준 학생을 찾습니다.', a: '사연을 공감 사연툰으로 만들었어요. 학생을 찾으면 후속편으로 전할게요!', fmt: '공감 사연툰 EP.02', vid: '', date: '2027-10-12' },
+    { cat: '우리 가게 추천', nick: '단골', town: '보산동', q: '50년 된 보산동 분식집을 추천해요.', a: '사장님과 마감 10분 인터뷰를 촬영했어요.', fmt: '동두천 사람들: 마감 10분', vid: 'closing', date: '2027-09-30' },
+    { cat: '그냥 궁금해요', nick: '역사덕후', town: '상패동', q: '소요산 자재암은 누가 세웠어요?', a: '원효대사가 세웠다고 전해져요. 전설까지 영상으로 정리했어요.', fmt: '신비한 동두천 사전 EP.04', vid: 'dict', date: '2027-09-18' },
+    { cat: '사진·영상 공모', nick: '찰칵', town: '탑동동', q: '탑동계곡 여름 풍경을 찍었어요.', a: '채택! 동두천 1분 산책 여름편에 소개했어요.', fmt: '동두천 1분 산책', vid: '', date: '2027-08-22' },
+    { cat: '시장에게 묻기', nick: '락스피릿', town: '중앙동', q: '락페스티벌 내년에도 하나요?', a: '내년 개최 계획을 영상에서 답했어요. 일정이 확정되면 공지로 알려 드려요.', fmt: '시민이 묻고 시장이 답하다 EP.06', vid: 'answer', date: '2027-08-10' }
+  ];
+  var all = [], view = [], shown = 6, filt = 'all', kw = '';
+
+  // CSV 파서 (따옴표·줄바꿈 대응)
+  function parseCSV(t) {
+    var rows = [], row = [], f = '', q = false;
+    for (var i = 0; i < t.length; i++) {
+      var c = t[i];
+      if (q) { if (c === '"') { if (t[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+      else if (c === '"') q = true; else if (c === ',') { row.push(f); f = ''; }
+      else if (c === '\n' || c === '\r') { if (c === '\r' && t[i + 1] === '\n') i++; row.push(f); rows.push(row); row = []; f = ''; }
+      else f += c;
+    }
+    if (f || row.length) { row.push(f); rows.push(row); }
+    return rows;
+  }
+  function col(head, keys) { for (var i = 0; i < head.length; i++) for (var k = 0; k < keys.length; k++) if (head[i].replace(/\s/g, '').indexOf(keys[k]) > -1) return i; return -1; }
+  function fromSheet(text) {
+    var rows = parseCSV(text).filter(function (r) { return r.some(function (x) { return x.trim(); }); });
+    if (rows.length < 2) return [];
+    var h = rows[0], ix = {
+      date: col(h, ['타임스탬프', 'Timestamp']), cat: col(h, ['보낼곳']), nick: col(h, ['닉네임']), town: col(h, ['동네']),
+      q: col(h, ['내용']), pub: col(h, ['공개']), a: col(h, ['답변']), fmt: col(h, ['포맷', '시리즈']), vid: col(h, ['영상ID', '유튜브ID', '영상아이디'])
+    };
+    return rows.slice(1).map(function (r) {
+      var g = function (k) { return ix[k] > -1 ? (r[ix[k]] || '').trim() : ''; };
+      return { pub: g('pub'), cat: g('cat'), nick: g('nick'), town: g('town'), q: g('q'), a: g('a'), fmt: g('fmt'), vid: g('vid'), date: (function (d) { var m = d.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/); return m ? m[1] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2) : d; })(g('date')) };
+    }).filter(function (o) { return /^(y|yes|o|공개|예|✔|true)$/i.test(o.pub) && o.a; }).reverse();
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function render() {
+    var k = kw.toLowerCase();
+    view = all.filter(function (o) { return (filt === 'all' || o.cat === filt) && (!k || (o.q + ' ' + o.a + ' ' + o.fmt).toLowerCase().indexOf(k) > -1); });
+    grid.innerHTML = view.slice(0, shown).map(function (o, i) {
+      var v = o.vid ? '<button class="bvid" data-i="' + i + '">▶ 답변 영상 보기</button>' : '';
+      return '<article class="card bcard"><div class="bhead"><span class="bcat">' + esc(o.cat || '질문') + '</span><span class="bdate">' + esc(o.date) + '</span></div>' +
+        '<p class="bq"><b>Q</b>' + esc(o.q) + '</p><p class="bmeta">' + esc([o.town, o.nick].filter(Boolean).join(' · ')) + '</p>' +
+        '<p class="ba"><b>A</b>' + esc(o.a) + '</p><div class="bbot"><span class="bfmt">' + esc(o.fmt) + '</span>' + v + '</div></article>';
+    }).join('') || '<div class="bempty"><img src="assets/ddc-shy.webp" alt=""><b>아직 해당하는 답변이 없어요</b><span>질문을 남겨 주시면 영상으로 답해 드려요!</span></div>';
+    more.style.display = view.length > shown ? '' : 'none';
+    Array.prototype.forEach.call(grid.querySelectorAll('.bvid'), function (b) {
+      b.addEventListener('click', function () {
+        var o = view[+b.dataset.i], cfg = (C.videos || {})[o.vid];
+        var fake = document.createElement('div'); fake.dataset.video = cfg ? o.vid : '';
+        if (!cfg && /^[\w-]{11}$/.test(o.vid)) { C.videos = C.videos || {}; C.videos['_b' + b.dataset.i] = { title: o.fmt || o.q, id: o.vid }; fake.dataset.video = '_b' + b.dataset.i; }
+        window.__openVideo && window.__openVideo(fake.dataset.video);
+      });
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('#bChips .ch'), function (b) {
+    b.addEventListener('click', function () {
+      Array.prototype.forEach.call(document.querySelectorAll('#bChips .ch'), function (x) { x.classList.toggle('on', x === b); });
+      filt = b.dataset.b; shown = 6; render();
+    });
+  });
+  qInput.addEventListener('input', function () { kw = qInput.value.trim(); shown = 6; render(); });
+  more.addEventListener('click', function () { shown += 6; render(); });
+
+  var url = (C.answerSheetCsvUrl || '').trim();
+  function demo(msg) { all = DEMO; note.textContent = msg; render(); }
+  if (!url) demo('예시 데이터예요. 구글시트를 연결하면 실제 답변이 자동으로 올라와요.');
+  else fetch(url, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.text(); })
+    .then(function (t) { all = fromSheet(t); note.textContent = all.length ? '구글시트에서 자동으로 불러왔어요.' : ''; if (!all.length) demo('아직 공개된 답변이 없어 예시를 보여 드려요.'); else render(); })
+    .catch(function () { demo('구글시트를 불러오지 못해 예시를 보여 드려요.'); });
 })();
 
 /* ---------- DDC 픽셀 캐릭터 (혼자 걷기 · 반응 · 잡기 · 던지기) ---------- */

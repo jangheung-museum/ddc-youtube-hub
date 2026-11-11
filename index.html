@@ -10,7 +10,7 @@
 <meta property="og:image" content="assets/ddc-jump.webp">
 <link rel="icon" href="assets/mark.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="styles.css?v=20261109-4">
+<link rel="stylesheet" href="styles.css?v=20261109-5">
 </head>
 <body>
 <div class="proto-bar"><b>제안용 시안</b> · <span class="pl">2027 동두천시 공식 유튜브 운영 제안서 첨부 페이지이며, 동두천시 공식 사이트가 아닙니다.</span><span class="pm">동두천시 공식 사이트가 아닙니다</span></div>
@@ -18,7 +18,7 @@
 
 <nav><div class="wrap"><div class="bar">
   <a class="brand" href="#top"><img src="assets/mark.png" alt=""><div><b>동두천시 유튜브</b><small>시민참여 허브</small></div></a>
-  <div class="menu"><a data-go="ask" data-cat="시장에게 묻기">시장에게 묻기</a><a data-go="ask" data-cat="담당자에게 물어봐 주세요">물어봐 주세요</a><a data-go="ask" data-cat="우리 가게 추천">우리 가게 소개</a><a data-go="ask" data-cat="사진·영상 공모">내가 찍은 동두천</a><a data-go="series">영상 모아보기</a><a data-go="events">이벤트</a></div>
+  <div class="menu"><a data-go="ask">질문하기</a><a data-go="vote">공감 투표</a><a data-go="board">답변 게시판</a><a data-go="series">영상</a><a data-go="events">이벤트</a></div>
   <a class="btn coral sm" id="subscribeBtn" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4" fill="#fff"/><path d="M10 9 L15 12 L10 15Z" fill="#C65A4E"/></svg>구독하기</a>
 </div></div></nav>
 
@@ -88,8 +88,29 @@
   </div>
 </div></header>
 
-<section id="answer"><div class="wrap">
-  <div class="sh"><div><span class="eye">MONTHLY ANSWER</span><h2>이번 달 시장 답변</h2><p>공감을 많이 받은 질문을 골라 시장이 직접 답합니다.</p></div><a class="more" data-toast="지난 답변 모음은 오픈 후 공개돼요">지난 답변 전체보기 →</a></div>
+<section id="ask"><div class="wrap ask">
+  <div class="askL grain">
+    <span class="eye light">ASK</span><h2>질문 하나면<br><span style="color:#9CD818">충분해요</span></h2>
+    <p>글로 써도 좋고, 15초 영상을 찍어 보내도 좋아요.<br>선정된 질문은 영상으로 답해 드려요.</p>
+    <ul><li>① 닉네임과 질문만 남기면 끝</li><li>② 공감이 많을수록 우선 선정</li><li>③ 답변 영상이 올라오면 알림</li></ul>
+    <img src="assets/ddc-point.webp" alt="" style="position:absolute;right:18px;bottom:-6px;height:250px">
+  </div>
+  <form class="card form" id="askForm" novalidate>
+    <div class="field"><label>어디로 보낼까요?</label><div class="chips" id="catChips"><button type="button" class="ch on" data-cat="시장에게 묻기">시장에게 묻기</button><button type="button" class="ch" data-cat="담당자에게 물어봐 주세요">담당자에게 물어봐 주세요</button><button type="button" class="ch" data-cat="그냥 궁금해요">그냥 궁금해요</button><button type="button" class="ch" data-cat="사연 보내기">사연 보내기</button><button type="button" class="ch" data-cat="우리 가게 추천">우리 가게 추천</button><button type="button" class="ch" data-cat="사진·영상 공모">사진·영상 공모</button></div></div>
+    <div class="row2">
+      <div class="field" id="fNick"><label for="nick">닉네임</label><input class="input" id="nick" maxlength="20" placeholder="예) 보산동 산책러"><div class="err">닉네임을 적어 주세요</div></div>
+      <div class="field"><label for="town">사는 동네 (선택)</label><input class="input" id="town" maxlength="20" placeholder="예) 생연동"></div>
+    </div>
+    <div class="field" id="fBody"><label for="body" id="bodyLabel">질문 내용</label><textarea class="input area" id="body" maxlength="300" placeholder="동두천에 대해 궁금한 점을 자유롭게 적어 주세요."></textarea><span class="count"><b id="cnt">0</b> / 300</span><div class="err">내용을 10자 이상 적어 주세요</div></div>
+    <div class="field"><label for="link">영상·사진 링크 (선택)</label><div class="upload"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="3" fill="#fff"/><path d="M16 10 L21 7 L21 17 L16 14Z" fill="#fff"/></svg></div><div style="flex:1"><input class="input" id="link" placeholder="유튜브·구글드라이브·인스타 링크" style="background:transparent;box-shadow:none;padding:4px 0"><span>15초 셀프 영상을 올린 뒤 링크를 붙여 주세요</span></div></div></div>
+    <div class="priv"><svg width="18" height="18" viewBox="0 0 24 24" style="flex:none;margin-top:1px"><path d="M12 2 L20 6 V12 C20 17 16 21 12 22 C8 21 4 17 4 12 V6Z" fill="#546C5A"/></svg>연락처는 받지 않아요. 영상 출연자로 선정되면 별도 안내와 동의 절차를 거쳐요.</div>
+    <button type="submit" class="btn lime submit" id="submitBtn">질문 보내기</button>
+    <p class="mode-note" id="modeNote"></p>
+  </form>
+</div></section>
+
+<section id="vote"><div class="wrap">
+  <div class="sh"><div><span class="eye">VOTE</span><h2>공감 투표</h2><p>공감이 많은 질문이 다음 달 영상 주제가 돼요. 왼쪽은 가장 최근 답변 영상이에요.</p></div><a class="more" data-go="board">답변 게시판 →</a></div>
   <div class="answer">
     <div class="card video" data-video="answer">
       <div class="thumb grain" style="background:radial-gradient(120% 120% at 20% 0%,#6C8771,#546C5A 50%,#34463A)">
@@ -113,35 +134,17 @@
   </div>
 </div></section>
 
-<section id="ask"><div class="wrap ask">
-  <div class="askL grain">
-    <span class="eye light">ASK</span><h2>질문 하나면<br><span style="color:#9CD818">충분해요</span></h2>
-    <p>글로 써도 좋고, 15초 영상을 찍어 보내도 좋아요.<br>선정된 질문은 영상으로 답해 드려요.</p>
-    <ul><li>① 닉네임과 질문만 남기면 끝</li><li>② 공감이 많을수록 우선 선정</li><li>③ 답변 영상이 올라오면 알림</li></ul>
-    <img src="assets/ddc-point.webp" alt="" style="position:absolute;right:18px;bottom:-6px;height:250px">
-  </div>
-  <form class="card form" id="askForm" novalidate>
-    <div class="field"><label>어디로 보낼까요?</label><div class="chips" id="catChips"><button type="button" class="ch on" data-cat="시장에게 묻기">시장에게 묻기</button><button type="button" class="ch" data-cat="담당자에게 물어봐 주세요">담당자에게 물어봐 주세요</button><button type="button" class="ch" data-cat="우리 가게 추천">우리 가게 추천</button><button type="button" class="ch" data-cat="사진·영상 공모">사진·영상 공모</button></div></div>
-    <div class="row2">
-      <div class="field" id="fNick"><label for="nick">닉네임</label><input class="input" id="nick" maxlength="20" placeholder="예) 보산동 산책러"><div class="err">닉네임을 적어 주세요</div></div>
-      <div class="field"><label for="town">사는 동네 (선택)</label><input class="input" id="town" maxlength="20" placeholder="예) 생연동"></div>
-    </div>
-    <div class="field" id="fBody"><label for="body" id="bodyLabel">질문 내용</label><textarea class="input area" id="body" maxlength="300" placeholder="동두천에 대해 궁금한 점을 자유롭게 적어 주세요."></textarea><span class="count"><b id="cnt">0</b> / 300</span><div class="err">내용을 10자 이상 적어 주세요</div></div>
-    <div class="field"><label for="link">영상·사진 링크 (선택)</label><div class="upload"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="3" fill="#fff"/><path d="M16 10 L21 7 L21 17 L16 14Z" fill="#fff"/></svg></div><div style="flex:1"><input class="input" id="link" placeholder="유튜브·구글드라이브·인스타 링크" style="background:transparent;box-shadow:none;padding:4px 0"><span>15초 셀프 영상을 올린 뒤 링크를 붙여 주세요</span></div></div></div>
-    <div class="priv"><svg width="18" height="18" viewBox="0 0 24 24" style="flex:none;margin-top:1px"><path d="M12 2 L20 6 V12 C20 17 16 21 12 22 C8 21 4 17 4 12 V6Z" fill="#546C5A"/></svg>연락처는 받지 않아요. 영상 출연자로 선정되면 별도 안내와 동의 절차를 거쳐요.</div>
-    <button type="submit" class="btn lime submit" id="submitBtn">질문 보내기</button>
-    <p class="mode-note" id="modeNote"></p>
-  </form>
+<section id="board"><div class="wrap">
+  <div class="sh"><div><span class="eye">ANSWER BOARD</span><h2>답변 게시판</h2><p>시민 질문에 영상과 글로 답한 내용을 모았어요.</p></div>
+    <div class="bsearch"><svg width="18" height="18" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6" fill="none" stroke="#66665A" stroke-width="2.4"/><path d="M16 16l4 4" stroke="#66665A" stroke-width="2.4" stroke-linecap="round"/></svg><input id="bq" placeholder="질문·답변 검색" aria-label="답변 검색"></div></div>
+  <div class="chips bchips" id="bChips"><button class="ch on" data-b="all">전체</button><button class="ch" data-b="시장에게 묻기">시장에게 묻기</button><button class="ch" data-b="담당자에게 물어봐 주세요">담당자에게</button><button class="ch" data-b="그냥 궁금해요">그냥 궁금해요</button><button class="ch" data-b="사연 보내기">사연</button><button class="ch" data-b="우리 가게 추천">가게 추천</button><button class="ch" data-b="사진·영상 공모">사진·영상</button></div>
+  <div class="bgrid" id="bGrid"></div>
+  <div class="bfoot"><button class="btn cream sm" id="bMore">더 보기</button><span class="bnote" id="bNote"></span></div>
 </div></section>
 
-<section id="how"><div class="wrap">
-  <div class="bandbox grain">
-    <svg class="bandhill" viewBox="0 0 1160 120" preserveAspectRatio="none"><path d="M0 120 L0 70 C140 40 260 30 380 56 C500 82 600 24 740 30 C860 36 940 76 1060 62 C1110 56 1140 50 1160 52 L1160 120Z" fill="rgba(255,255,255,.07)"/><path d="M0 120 L0 92 C200 72 400 90 600 80 C800 70 1000 92 1160 84 L1160 120Z" fill="rgba(156,216,24,.18)"/></svg>
-    <img class="bandchar" src="assets/ddc-cheer.webp" alt="">
-    <div class="sh"><div><span class="eye light">HOW IT WORKS</span><h2>질문이 영상이 되기까지</h2><p>매달 이 순서로 돌아가요.</p></div></div>
-    <div class="flow"><div class="card step"><div class="no">STEP 1</div><div class="ico" style="background:linear-gradient(180deg,#B7EA3C,#8CC414);box-shadow:0 1px 0 rgba(255,255,255,.55) inset,0 -4px 0 rgba(0,0,0,.12) inset,0 5px 0 #6F9E0C,0 14px 20px -8px rgba(0,0,0,.35)"><svg width="32" height="32" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z" fill="#fff"/></svg></div><b>질문 등록</b><span>허브에서 글·영상으로<br>질문을 남겨요</span></div><div class="card step"><div class="no">STEP 2</div><div class="ico" style="background:linear-gradient(180deg,#F08A7C,#C65A4E);box-shadow:0 1px 0 rgba(255,255,255,.55) inset,0 -4px 0 rgba(0,0,0,.12) inset,0 5px 0 #9E4136,0 14px 20px -8px rgba(0,0,0,.35)"><svg width="32" height="32" viewBox="0 0 24 24"><path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z" fill="#fff"/></svg></div><b>공감·선정</b><span>공감이 많은 질문을<br>매달 골라요</span></div><div class="card step"><div class="no">STEP 3</div><div class="ico" style="background:linear-gradient(180deg,#FFD866,#F2B21E);box-shadow:0 1px 0 rgba(255,255,255,.55) inset,0 -4px 0 rgba(0,0,0,.12) inset,0 5px 0 #C88B0A,0 14px 20px -8px rgba(0,0,0,.35)"><svg width="32" height="32" viewBox="0 0 24 24"><rect x="3" y="7" width="13" height="10" rx="2" fill="#fff"/><path d="M16 11l5-3v8l-5-3z" fill="#fff"/></svg></div><b>촬영</b><span>시장·담당자가<br>직접 답해요</span></div><div class="card step"><div class="no">STEP 4</div><div class="ico" style="background:linear-gradient(180deg,#FF6B5E,#E0352A);box-shadow:0 1px 0 rgba(255,255,255,.55) inset,0 -4px 0 rgba(0,0,0,.12) inset,0 5px 0 #A82219,0 14px 20px -8px rgba(0,0,0,.35)"><svg width="32" height="32" viewBox="0 0 24 24"><path d="M9 7l9 5-9 5z" fill="#fff"/></svg></div><b>유튜브 업로드</b><span>공식 채널에 영상과<br>숏폼으로 공개</span></div><div class="card step"><div class="no">STEP 5</div><div class="ico" style="background:linear-gradient(180deg,#7FC3E8,#3D97CC);box-shadow:0 1px 0 rgba(255,255,255,.55) inset,0 -4px 0 rgba(0,0,0,.12) inset,0 5px 0 #2A6E99,0 14px 20px -8px rgba(0,0,0,.35)"><svg width="32" height="32" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><b>답변 게시</b><span>허브에 답변 완료 표시,<br>질문자에게 알림</span></div></div>
-  </div>
-</div></section>
+@@ASK@@
+
+
 
 <section id="series"><div class="wrap">
   <div class="sh"><div><span class="eye">SERIES</span><h2>시리즈 영상 모아보기</h2><p>동두천시 유튜브의 고정 시리즈를 한곳에서.</p></div><div class="chips" id="filterChips"><button class="ch on" data-f="all">전체</button><button class="ch" data-f="info">시정정보</button><button class="ch" data-f="people">시민참여</button><button class="ch" data-f="story">동두천 이야기</button></div></div>
@@ -180,10 +183,10 @@
 
 <!-- 모바일 하단 탭바 -->
 <div class="tabbar">
-  <a href="#top" class="on"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z" fill="currentColor"/></svg>홈</a>
-  <a data-go="series"><svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg>영상</a>
+  <a href="#top" data-go="top" class="on"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z" fill="currentColor"/></svg>홈</a>
+  <a data-go="board"><svg width="22" height="22" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>답변</a>
   <a data-go="ask" class="tabask"><div class="fab"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#22300A" stroke-width="3.2" stroke-linecap="round"/></svg></div>질문하기</a>
-  <a data-go="answer"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>공감</a>
+  <a data-go="series"><svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg>영상</a>
   <a data-go="events"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z" fill="none" stroke="currentColor" stroke-width="2"/></svg>이벤트</a>
 </div>
 
@@ -197,7 +200,7 @@
 <div class="toast" id="toast"></div>
 <canvas id="confetti"></canvas>
 
-<script src="config.js?v=20261109-4"></script>
-<script src="app.js?v=20261109-4"></script>
+<script src="config.js?v=20261109-5"></script>
+<script src="app.js?v=20261109-5"></script>
 </body>
 </html>

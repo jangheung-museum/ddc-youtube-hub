@@ -15,6 +15,13 @@ window.HUB_CONFIG = {
      비워 두면 '시연 모드'로 동작해요(브라우저에만 저장). */
   googleFormPrefillUrl: "https://docs.google.com/forms/d/e/1FAIpQLSckQ-neSInTCSyGwc23i7pUWuI_Vec9cvZoBvKpzSdtXY210Q/viewform?usp=pp_url&entry.1227553604=%EC%8B%9C%EC%9E%A5%EC%97%90%EA%B2%8C+%EB%AC%BB%EA%B8%B0&entry.1716663427=NICK&entry.682521228=TOWN&entry.366953459=BODY&entry.391765214=LINK",
 
+  /* 1-2) 답변 게시판 연결 (구글시트 → 웹에 게시 → CSV 링크)
+     응답 시트 오른쪽에 열 4개를 추가하세요: 공개 · 답변 · 포맷 · 영상ID
+     '공개' 칸에 Y 를 적고 '답변'을 채운 행만 게시판에 올라가요.
+     파일 → 공유 → 웹에 게시 → (응답 시트) · 쉼표로 구분된 값(.csv) → 게시 → 링크를 아래에 붙여 넣기.
+     비워 두면 예시 답변이 보여요. */
+  answerSheetCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvwIFln3gplh-Wq4bDnlUYOYdi2B_YKi6iH6zmOr6hhT3sAzofE4a7_Y2ab3eBY0SDC76WiZ0H2V2x/pub?gid=1290994465&single=true&output=csv",
+
   /* 2) 동두천시 공식 유튜브 채널 주소 (구독하기 버튼) */
   youtubeChannel: "https://www.youtube.com/results?search_query=%EB%8F%99%EB%91%90%EC%B2%9C%EC%8B%9C",
 

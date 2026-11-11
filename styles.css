@@ -333,3 +333,35 @@ nav .btn.coral:active{transform:translateY(1px)}
 /* 캐릭터는 글자·버튼 뒤로 지나가고, 빈 곳에서는 잡을 수 있게 */
 .stage .hl{pointer-events:none}
 .stage .hl a,.stage .hl button,.stage .hl .st,.stage .hl .chip{pointer-events:auto}
+
+/* ===== 답변 게시판 ===== */
+.bsearch{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(84,108,90,.15);border-radius:999px;padding:10px 16px;min-width:280px;box-shadow:0 6px 14px -10px rgba(45,80,55,.4)}
+.bsearch input{border:0;outline:0;font:inherit;font-size:15px;width:100%;background:transparent;color:var(--ink)}
+.bchips{margin:-6px 0 20px}
+.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.bcard{padding:20px 20px 16px;display:flex;flex-direction:column;gap:8px}
+.bcard:hover{transform:none}
+.bhead{display:flex;justify-content:space-between;align-items:center}
+.bcat{font-size:12px;font-weight:900;color:#46640A;background:var(--limeL);border-radius:999px;padding:4px 10px}
+.bdate{font-size:12px;color:var(--sub);font-weight:700}
+.bq,.ba{display:flex;gap:9px;line-height:1.55;font-size:15px}
+.bq{font-weight:800}
+.bq b,.ba b{flex:none;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:900;color:#fff;background:#546C5A;margin-top:1px}
+.ba b{background:#9CD818;color:#22300A}
+.ba{color:#3F4A42;font-weight:600;background:rgba(84,108,90,.06);border-radius:14px;padding:10px 12px}
+.bmeta{font-size:12.5px;color:var(--sub);font-weight:700;padding-left:33px;margin-top:-4px}
+.bbot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:4px}
+.bfmt{font-size:12.5px;font-weight:800;color:var(--green)}
+.bvid{font-size:13px;font-weight:900;color:#fff;background:linear-gradient(180deg,#DD7366,#C65A4E);border-radius:999px;padding:8px 13px;box-shadow:0 3px 0 #9E4136;white-space:nowrap}
+.bvid:active{transform:translateY(2px)}
+.bfoot{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:22px}
+.bnote{font-size:12.5px;color:var(--sub);font-weight:700}
+.bempty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:30px;color:var(--sub);font-weight:700}
+.bempty img{height:110px}.bempty b{color:var(--ink);font-size:17px}
+@media (max-width:980px){
+  .bsearch{min-width:0;width:100%}
+  .bgrid{grid-template-columns:1fr}
+  .bchips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;margin-right:-16px;scrollbar-width:none}
+  .bchips .ch{flex:none}
+  #catChips{gap:7px}
+}
